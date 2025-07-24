@@ -22,7 +22,7 @@ This Java server implements the business logic for the Keyple Demo ecosystem, ma
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │   Web Clients   │     │   Java Server   │     │   PC/SC Reader  │
-│                 │────▶│                 │────▶│                 │
+│                 │────>│                 │────>│                 │
 │ Android/iOS/Web │     │ Quarkus + REST  │     │ SAM Integration │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
                                   │

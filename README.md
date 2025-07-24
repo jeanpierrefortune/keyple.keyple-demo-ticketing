@@ -12,7 +12,7 @@ The Keyple Demo Ecosystem consists of three interconnected applications that sim
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   RELOAD DEMO   │────▶│ VALIDATION DEMO │────▶│  CONTROL DEMO   │
+│   RELOAD DEMO   │────>│ VALIDATION DEMO │────>│  CONTROL DEMO   │
 │                 │     │                 │     │                 │
 │ Load contracts  │     │ Validate entry  │     │ Check validity  │
 │ onto cards      │     │ to transport    │     │ after use       │
@@ -49,7 +49,7 @@ Simple storage cards featuring:
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │   Mobile/Web    │     │   Java Server   │     │      SAM        │
-│    Clients      │────▶│   + Dashboard   │────▶│   (Security)    │
+│    Clients      │────>│   + Dashboard   │────>│   (Security)    │
 │                 │     │                 │     │                 │
 │ User Interface  │     │ Business Logic  │     │ Cryptographic   │
 │ Card Interface  │     │ Data Management │     │   Operations    │
