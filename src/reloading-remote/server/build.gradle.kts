@@ -105,8 +105,8 @@ java {
 
 fun copyLicenseFiles() {
   val metaInfDir = File(layout.buildDirectory.get().asFile, "resources/main/META-INF")
-  val licenseFile = File(project.rootDir, "LICENSE")
-  val noticeFile = File(project.rootDir, "NOTICE.md")
+  val licenseFile = File("${project.rootDir}/../../../", "LICENSE")
+  val noticeFile = File("${project.rootDir}/../../../", "NOTICE.md")
   metaInfDir.mkdirs()
   licenseFile.copyTo(File(metaInfDir, "LICENSE"), overwrite = true)
   noticeFile.copyTo(File(metaInfDir, "NOTICE.md"), overwrite = true)
