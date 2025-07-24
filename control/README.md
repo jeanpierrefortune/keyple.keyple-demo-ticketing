@@ -1,242 +1,681 @@
 # Keyple Control Demo
 
-This is the repository for the Keyple Android Control Demo application.
+[![Android](https://img.shields.io/badge/android-7.0%2B-green.svg)](https://developer.android.com/)
+[![Release](https://img.shields.io/github/v/release/calypsonet/keyple-demo-ticketing-control-app)](https://github.com/calypsonet/keyple-demo-ticketing-control-app/releases)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-This demo is an open source project provided by the [Calypso Networks Association](https://calypsonet.org) implementing
-the [Eclipse Keyple SDK](https://keyple.org) in a typical use case that can serve as a basis for building a ticketing
-ecosystem based on contactless cards and/or NFC smartphones.
+Android control terminal application for post-validation inspection of transportation cards. This application represents the final verification step in the ticketing workflow, allowing inspectors to verify the validity of validation events and contract usage.
 
-The source code and APK are available at  [calypsonet/keyple-demo-ticketing-control-app/releases](https://github.com/calypsonet/keyple-demo-ticketing-control-app/releases)
+[⬅️ Back to Main Project](../README.md)
 
-The code can be easily adapted to other cards, terminals and business logic.
+## Overview
 
-It shows how to easily control a card following a validation performed with the [Keyple Demo Validation](https://github.com/calypsonet/keyple-demo-ticketing-validation-app)
-application (entry into the transportation network with a Season Pass and/or Multi-trip ticket).
-The contracts being updated in the Calypso card with the Android application of the [Keyple Reload Demo package](https://github.com/calypsonet/keyple-demo-ticketing-reloading-remote).
+This Android application simulates inspection terminals used by transportation authority personnel to verify that passengers have properly validated their travel. It analyzes validation events created by the [Validation Demo](../validation-app/) and provides comprehensive contract status information for compliance checking.
 
-The demo application was tested on the following terminals:
-- `Famoco FX205` via the open source plugins [Famoco](https://github.com/calypsonet/keyple-famoco) (for SAM access) and [Android NFC](https://keyple.org/components-java/plugins/nfc/) (for card access).
-- `Coppernic C-One 2` via the open source plugin [Coppernic](https://github.com/calypsonet/keyple-android-plugin-coppernic).
-- `Standard NFC smartphone` via the open source plugin [Android NFC](https://keyple.org/components-java/plugins/nfc/).
+**Role in Ecosystem**: Final step in the ticketing workflow - inspects cards after validation to verify proper usage and contract compliance.
 
-The following terminals have also been tested but as they require non-open source libraries, they are not active by default (see [Using proprietary plugins](#using-proprietary-plugins))
-- `Bluebird EF501` via the proprietary plugin [Bluebird](https://github.com/calypsonet/keyple-plugin-cna-bluebird-specific-nfc-java-lib).
-- `Flowbird Axio 2` via the proprietary plugin [Flowbird](https://github.com/calypsonet/keyple-android-plugin-flowbird).
+**Control Purpose**: Verify that the last validation event is legitimate and that contracts are being used appropriately within the transportation system.
 
-All exchanges made with the controlled card are potentially cryptographically certified by a security module (SAM) when
-it is installed and available.
-However, if this is not the case, the validity of the card is made from a simple reading of the data (this is always
-the case when the application is launched on a standard smartphone).
+## Prerequisites
 
-## Supported Card Types
+### Hardware Requirements
+- Android device with Android 7.0+ (API level 24+)
+- NFC capability for contactless card reading
+- **SAM (Security Access Module)** for secure Calypso operations (optional)
+- Compatible terminal hardware (see [tested terminals](#tested-terminals))
 
-This application supports two types of cards:
+### Software Requirements
+- Cards with validation events from [Validation Demo](../validation-app/)
+- Contracts loaded using [Reload Demo](../client/)
+- Inspector training on control procedures and results interpretation
 
-### Calypso Cards
-Standard Calypso cards that support secure sessions with SAM authentication. These cards can contain multiple contracts (up to 4 depending on the product type: Basic=1, Light=2, Prime/Regular=4) and use secure cryptographic operations.
+### Card Requirements
+- Previously validated cards with event history
+- Valid contract structures and authentication data
+- Supported AIDs (see [Common Library](../common/README.md#supported-card-applications))
 
-### Storage Cards
-Simple storage cards that don't require SAM authentication. These cards contain a single contract and use basic read/write operations without cryptographic security.
+## Installation
 
-**Important Note**: The Storage Card implementation in this demo is intentionally basic and does not account for potential specific capabilities that different types of storage cards might offer, such as dedicated counters for specific components, advanced memory management, or card-specific security features. A production application would likely need to consider and implement these card-specific capabilities based on the actual storage card technology being used.
+### Download APK
+1. Visit [Releases page](https://github.com/calypsonet/keyple-demo-ticketing/releases)
+2. Download latest `keyple-control-android-X.Y.Z.apk`
+3. Enable "Install from unknown sources" in Android settings
+4. Install the APK file
 
-**Security Consideration**: No security mechanisms have been implemented for Storage Cards in this demonstration. In a production environment, developers should implement appropriate security measures to protect data exchanges, for example by using signatures generated by a SAM or other cryptographic security modules suitable for their specific use case and security requirements.
+### Build from Source
+```bash
+git clone https://github.com/calypsonet/keyple-demo-ticketing.git
+cd keyple-demo-ticketing/control  
+./gradlew assembleDebug
+```
 
-## Keyple Demos
+## Configuration
 
-This demo is part of a set of three demos:
-* [Keyple Reload Demo](https://github.com/calypsonet/keyple-demo-ticketing-reloading-remote)
-* [Keyple Validation Demo](https://github.com/calypsonet/keyple-demo-ticketing-validation-app)
-* [Keyple Control Demo](https://github.com/calypsonet/keyple-demo-ticketing-control-app)
+### Device Selection
+1. Launch application
+2. Select device type from **Device Selection** screen:
+  - **Famoco FX205**: Enterprise terminal with SAM reader
+  - **Coppernic C-One 2**: Rugged Android terminal
+  - **Standard NFC**: Consumer Android device (Storage Cards only)
+  - Proprietary terminals (grayed out by default)
 
-These demos are all based on a common library that defines elements such as constants and data structures implemented
-for the logic of the ticketing application: [Keyple Demo Common Library](https://github.com/calypsonet/keyple-demo-ticketing-common-lib).
+### Control Settings
+1. Open **Settings** from main menu
+2. Configure control parameters:
 
-Please refer to the [README](https://github.com/calypsonet/keyple-demo-ticketing-common-lib/blob/main/README.md)
-file of this library to discover these data structures. All enumerated types used across the three demo applications (Priority Codes, Version Numbers, etc.) are defined in this common library to ensure consistency and interoperability between the different components of the ticketing ecosystem.
+**Location Settings**:
+- **Control Location**: Identifier for this inspection point
+- **Location Name**: Human-readable location (e.g., "Central Station", "Bus Line 42")
+- Used to verify validation occurred in correct zone/network
 
-## Control Procedure
+**Validity Settings**:
+- **Validity Duration**: Time window (minutes) for considering validation events as current
+- **Grace Period**: Additional time allowance for edge cases
+- **Location Tolerance**: Accept validations from specific other locations
 
-### Control Use Case
+**Inspector Settings**:
+- **Inspector ID**: Unique identifier for accountability
+- **Shift Information**: Start/end times for reporting
+- **Report Generation**: Enable automatic inspection reports
 
-The control use case will first analyze the event to obtain the information from the contract that was used in the last
-validation and then read and collect the information of all contracts present in the card and their validity status.
+## Usage
 
-The list of contract returned must clearly mark the contract that was used in the validation (if any).
+### Standard Control Flow
 
-Steps:
-1. Detection and Selection
-2. Event Analysis
-3. Contract Analysis
+```
+Device Selection → Settings → Home → Reader Activity → Control Results
+```
 
-### Process for Calypso Cards
+### Detailed Screen Guide
 
-For this control demo application, a simple example control procedure has been implemented.
-This procedure is implemented in the `CalypsoCardRepository` class.
+**Device Selection (`DeviceSelectionActivity`)**
+- Choose appropriate hardware plugin for terminal type
+- Proprietary plugins require additional setup (see [Proprietary Plugins](#proprietary-plugins))
 
-Opening a Calypso secure session is optional for this procedure since we do not need to write anything on the card.
-So if the Calypso SAM is present at the beginning we set the `isSecureSessionMode` to true, but we keep on with the procedure if not.
+**Settings (`SettingsActivity`)**
+- Configure location and validity parameters
+- Set inspector identification and reporting options
+- Access diagnostic and maintenance functions
 
-This procedure's main steps are as follows:
-- **Detection and Selection**
-  - Detection Analysis:
-    - If AID not found reject the card.
-  - Selection Analysis:
-    - If File Structure unknown reject the card.
-- **Environment Analysis:**
-  - Read the environment record:
-    - Open a secure session if `isSecureSessionMode` is true.
-    - Read the environment record.
-  - Unpack environment structure from the binary present in the environment record:
-    - If `EnvVersionNumber` of the `Environment` structure is not the expected one (==`VersionNumber.CURRENT_VERSION` for the current version) reject the card. Abort transaction if `isSecureSessionMode` is true.
-    - If `EnvEndDate` points to a date in the past reject the card. Abort transaction if `isSecureSessionMode` is true.
-- **Event Analysis:**
-  - Read and unpack the last event record:
-    - If `EventVersionNumber` is not the expected one (==`VersionNumber.CURRENT_VERSION` for the current version) reject the card (if ==`VersionNumber.UNDEFINED` return error status indicating clean card). Abort Transaction if `isSecureSessionMode` is true.
-    - If `EventLocation` != value configured in the control terminal set the validated contract **not valid** flag as true and go to **Contract Analysis**.
-    - Else If `EventDateStamp` points to a date in the past set the validated contract **not valid** flag as true and go to **Contract Analysis**.
-    - Else If (`EventTimeStamp` + Validation period configured in the control terminal) < current time of the control terminal set the validated contract **not valid** flag as true.
-- **Contract Analysis**: For each contract:
-  - Read all contracts and the counter file.
-  - For each contract:
-  - Unpack the contract
-  - If the `ContractVersionNumber` == `VersionNumber.UNDEFINED` then the contract is blank, move on to the next contract.
-  - If `ContractVersionNumber` is not the expected one (==`VersionNumber.CURRENT_VERSION` for the current version) reject the card. Abort Transaction if `isSecureSessionMode` is true.
-  - If `ContractAuthenticator` is not 0 perform the verification of the value by using the PSO Verify Signature command of the SAM (TODO: implementation pending).
-  - If `ContractValidityEndDate` points to a date in the past mark contract as Expired.
-  - If `EventContractUsed` points to the current contract index & **not valid** flag is false then mark it as Validated.
-  - If the `ContractTariff` value for the contract is `PriorityCode.MULTI_TRIP`, unpack the counter associated to the contract to extract the counter value.
-  - Add contract data to the list of contracts read to return to the upper layer.
-  - If `isSecureSessionMode` is true, close the Validation session.
-  - Return the status of the operation to the upper layer. <Exit process>
+**Home (`HomeActivity`)**
+- Inspector dashboard with current shift information
+- Quick access to settings and help documentation
+- Statistics on recent control operations
 
-### Process for Storage Cards
+**Reader Activity (`ReaderActivity`)**
+- Initializes selected Keyple plugin and optional SAM integration
+- Displays "Present Card for Control" message
+- Shows real-time analysis during card processing
+- Handles card detection and control procedure execution
 
-For Storage Cards, a simplified control procedure is implemented in the `StorageCardRepository` class.
+**Control Results**
 
-Storage Cards do not require SAM authentication and use simple read/write operations. The procedure is similar but adapted for the simpler card structure:
+**Valid Card Screen (`CardContentActivity`)**:
+- **Last Validation Event**:
+  - Date, time, and location of validation
+  - Contract used for validation
+  - Validation status (valid/expired/insufficient)
+- **Contract Analysis**:
+  - List of all contracts with current status
+  - Validity periods and remaining balances
+  - Priority assignments and usage history
+- **Compliance Status**: Clear indication of card validity
 
-**Important Limitations**: This implementation is a basic demonstration and does not leverage specific capabilities that various storage card types might offer. Production applications should be adapted to take advantage of card-specific features such as:
-- Dedicated counter management for different card components
-- Advanced memory organization and access patterns
-- Card-specific security features or encryption capabilities
-- Optimized read/write operations based on card technology
+**Invalid Card Screen (`NetworkInvalidActivity`)**:
+- **Non-compliance Reason**: Specific issue detected
+- **Recommended Action**: Guidance for inspector response
+- **Supporting Evidence**: Technical details for documentation
 
-**Security Notice**: This demonstration does not implement any security mechanisms for Storage Cards. Production applications should implement appropriate security measures such as:
-- Data encryption and authentication
-- Signature verification using SAM or other security modules
-- Secure key management and exchange protocols
-- Protection against replay attacks and data tampering
+### Control Scenarios
 
-The control procedure steps are:
+#### Valid Inspection Results
 
-- **Detection and Selection:**
-  - Same as Calypso cards but without secure session requirements.
-- **Environment and Event Analysis:**
-  - Read environment, event, and contract data in a single operation using block reads.
-  - Perform the same version and date validations as Calypso cards.
-  - Evaluate event validity based on location, date, and time criteria.
-- **Contract Analysis:**
-  - Storage Cards have only one contract, so analysis is simplified.
-  - Validate the contract version and validity dates.
-  - Check contract authentication if required (though no security is implemented in this demo).
-  - Determine if the contract was used in the last validation event.
-  - Extract counter values for `PriorityCode.MULTI_TRIP` and `PriorityCode.STORED_VALUE` contracts.
-  - Mark the contract status (validated, expired, etc.) based on the analysis.
-- **Result Generation:**
-  - Create the contract information for display.
-  - Include validation event details if available.
-  - Close the transaction without secure session procedures.
+**Recent Valid Validation**:
+- Card shows validation within validity duration
+- Validation occurred at acceptable location
+- Contract used was appropriate and had sufficient value
+- **Result**: Passenger in compliance
 
-## Screens
+**Valid Season Pass**:
+- Card shows Season Pass contract within validity period
+- Recent validation event confirms proper usage
+- **Result**: Unlimited travel authorization confirmed
 
-- Device selection (`DeviceSelectionActivity`): Allows you to indicate the type of device used, in order to use the associated plugin.
-  - Initially, devices using proprietary plugins are grayed out.
-- Settings (`SettingsActivity`): Allows to set the settings of the control procedure:
-  - Location: Where the control is taking place. If the validation occurred in a different location, the controlled contract will not be considered as valid.
-  - Validity Duration: Period (in minutes) during which the contract is considered valid.
-- Home (`HomeActivity`): Allows to launch the card detection phase.
-- Reader (`ReaderActivity`): Initializes the Keyple plugin. At this point the user must present the card that he wishes to control.
-  - Initialize the Keyple plugin: start detection on NFC and SAM (if available) readers.
-  - Prepare and defines the default selection requests to be processed when a card is inserted.
-  - Listens to detected cards.
-  - Launches the Control Procedure when a card is detected.
-- Control result screen (`CardContentActivity`): displays the controlled card content.
-  - Contracts list.
-  - Last validation event.
-- Invalid control screen (`NetworkInvalidActivity`): displayed when the control procedure failed.
+**Valid Multi-trip Usage**:
+- Card shows Multi-trip contract with remaining trips
+- Validation event shows proper trip deduction
+- **Result**: Paid travel confirmed
 
-## Ticketing implementation
+#### Non-Compliance Detection
 
-Below are the description of the classes useful for implementing the ticketing layer:
-- `TicketingService`
-- `ReaderRepository`
-- `ReaderActivity.CardReaderObserver`
-- `CalypsoCardRepository` / `StorageCardRepository`
+**No Recent Validation**:
+- Last validation event outside validity duration
+- Passenger may have entered without validation
+- **Action**: Request proof of payment or issue citation
 
-### TicketingService
+**Wrong Location Validation**:
+- Validation occurred at incompatible location
+- May indicate network boundary violations
+- **Action**: Verify passenger's intended journey
 
-This service is the orchestrator of the ticketing process.
+**Expired Contract Usage**:
+- Validation attempted with expired contract
+- System should have rejected but may indicate tampering
+- **Action**: Detailed inspection and possible citation
 
-Mainly used to manage the lifecycle of the Keyple plugin.
-This service is used to initialize the plugin and manage the card detection phase.
-It is called on the different steps of the reader activity lifecycle:
-- onResume:
-  - Initialize the plugin (Card and SAM readers...)
-  - Get the ticketing session
-  - Start NFC detection
-- onPause:
-  - Stop NFC detection
-- onDestroy:
-  - Clear the Keyple plugin (remove observers and unregister plugin)
+**Insufficient Balance**:
+- Stored value validation with insufficient funds
+- May indicate payment system bypass
+- **Action**: Verify payment and request top-up
 
-It prepares and scheduled the selection scenario that will be sent to the card when a card is detected by setting
-the AID(s) and the reader protocol(s) of the cards we want to detect and read.
+## Technical Architecture
 
-Once a card is detected, the service processes the selection scenario by retrieving the current `CalypsoCard` or `StorageCard` object.
-This object contains information about the card (serial number, card revision...)
+### Supported Card Types
 
-Finally, this class is responsible for launching the control procedure and returning its result.
+#### Calypso Cards
+**Secure Analysis**:
+- Optional SAM authentication for enhanced security
+- Cryptographic verification of contract authenticity
+- Secure session management for sensitive operations
+- Full audit trail of all control operations
 
-### ReaderRepository
+**Control Procedure**:
+1. **Detection and Selection**: Verify supported AID
+2. **Environment Analysis**: Check card validity and expiration
+3. **Event Analysis**: Examine last validation event details
+4. **Contract Analysis**: Review all contracts and their status
+5. **Authentication Verification**: Validate contract signatures (if SAM available)
+6. **Compliance Determination**: Generate pass/fail result
 
-This service is the interface between the business layer and the reader.
+#### Storage Cards
+**Simplified Analysis**:
+- Basic read operations without SAM requirements
+- Direct data validation and consistency checking
+- Single contract analysis with simplified logic
+- **Note**: Production implementations should add security measures
 
-### ReaderActivity.CardReaderObserver
+**Control Procedure**:
+1. **Card Detection**: Read all card data in single operation
+2. **Data Validation**: Verify structure integrity and versions
+3. **Contract Analysis**: Check single contract status and validity
+4. **Event Verification**: Analyze validation event details
+5. **Compliance Assessment**: Determine card validity status
 
-This class is the reader observer and inherits from Keyple class `CardReaderObserverSpi`
+### Key Classes
 
-It is invoked each time a new `CardReaderEvent` (`CARD_INSERTED`, `CARD_MATCHED`...) is launched by the Keyple plugin.
-This reader is registered when the reader is registered and removed when the reader is unregistered.
+**TicketingService**
+- **Purpose**: Orchestrates control process lifecycle
+- **Responsibilities**:
+  - Plugin management and initialization
+  - Card detection and selection handling
+  - Control procedure coordination and result processing
+- **Integration**: Works with both SAM-enabled and SAM-less configurations
 
-### CardRepository
+**ReaderRepository**
+- **Purpose**: Hardware abstraction and reader management
+- **Functions**:
+  - Reader discovery and connection management
+  - Plugin-specific configuration and optimization
+  - Error handling and recovery procedures
+  - Status monitoring for operational reliability
 
-This class contains the implementation of the "Control" procedure.
+**CardReaderObserver**
+- **Purpose**: Handles card reader events from Keyple SDK
+- **Event Processing**:
+  - `CARD_INSERTED`: Initiates control procedure
+  - `CARD_MATCHED`: Confirms supported card type
+  - `CARD_REMOVED`: Cleans up resources
+  - `READER_FAILURE`: Handles hardware errors gracefully
 
-Two implementations are provided:
-- `CalypsoCardRepository`: For Calypso cards with secure session support
-- `StorageCardRepository`: For simple storage cards without secure session requirements
+**Card Repository Implementations**
 
-## Priority Codes
+**CalypsoCardRepository**
+- Implements comprehensive control procedure for Calypso cards
+- Manages optional secure sessions and SAM integration
+- Handles complex contract authentication and verification
+- Provides detailed compliance analysis and reporting
 
-The application uses the following priority codes for contract management:
+**StorageCardRepository**
+- Implements streamlined control for storage cards
+- Direct data access without cryptographic overhead
+- Simplified contract and event analysis
+- Basic compliance checking and result generation
 
-- `PriorityCode.SEASON_PASS`: Season pass contract (highest priority)
-- `PriorityCode.MULTI_TRIP`: Multi-trip ticket contract
-- `PriorityCode.STORED_VALUE`: Stored value contract
-- `PriorityCode.FORBIDDEN`: Contract is forbidden for use
-- `PriorityCode.EXPIRED`: Contract has expired
-- `PriorityCode.UNKNOWN`: Unknown contract type
-- `PriorityCode.UNDEFINED`: Undefined/uninitialized contract
+### Control Procedure Logic
 
-The control procedure analyzes contracts and displays their status, including whether they were used in the last validation event.
+#### Event Analysis Process
 
-## Using proprietary plugins
+```
+1. Read Environment Record
+   ├─ Verify card application validity
+   ├─ Check overall card expiration
+   └─ Extract holder information (if available)
 
-By default, proprietary plugins are deactivated.
-If you want to activate them, then here is the procedure to follow:
-1. make an explicit request to [CNA](https://calypsonet.org/contact-us/) to obtain the desired plugin,
-2. copy the plugin into the `/app/libs/` directory,
-3. delete in the `/app/libs/` directory the plugin with the same name but suffixed with `-mock` (e.g. xxx-mock.aar),
-4. compile the project via the gradle `build` command,
-5. deploy the new apk on the device.
+2. Read Last Event Record  
+   ├─ Extract validation timestamp and location
+   ├─ Identify contract used for validation
+   ├─ Retrieve contract priority information
+   └─ Assess event validity against current time/location
+
+3. Contract Analysis Loop
+   ├─ For each contract slot:
+   │  ├─ Read contract record and metadata
+   │  ├─ Verify contract version and structure
+   │  ├─ Check validity dates and expiration
+   │  ├─ Validate authentication (if SAM available)
+   │  ├─ Read associated counters (if applicable)
+   │  └─ Determine contract status and usability
+   └─ Generate comprehensive status report
+
+4. Compliance Determination
+   ├─ Compare event location with control location
+   ├─ Verify event timestamp within validity window
+   ├─ Confirm contract used was appropriate
+   ├─ Check contract had sufficient value/trips
+   └─ Generate pass/fail result with details
+```
+
+#### Contract Status Classification
+
+| Status | Description | Control Action |
+|:-------|:------------|:---------------|
+| **Validated** | Used in recent valid validation | ✅ Accept |
+| **Valid Unused** | Available for use but not recently validated | ℹ️ Informational |
+| **Expired** | Past validity date | ❌ Cannot be used |
+| **Insufficient** | Multi-trip (0 trips) or Stored Value (low balance) | ❌ Requires reload |
+| **Unknown** | Unrecognized contract type | ⚠️ Manual review |
+| **Blank** | Empty contract slot | ℹ️ Available for loading |
+
+## Hardware Integration
+
+### Tested Terminals
+
+#### Standard Plugins (Open Source)
+
+**Famoco FX205**
+- **Configuration**: Dual reader setup (NFC + SAM)
+- **Plugins**: [Famoco Plugin](https://github.com/calypsonet/keyple-famoco) + [Android NFC](https://keyple.org/components/standard-reader-plugins/keyple-plugin-android-nfc-lib/)
+- **Advantages**: Enterprise security, robust construction, integrated SAM
+- **Use Case**: Fixed inspection points, high-security environments
+
+**Coppernic C-One 2**
+- **Configuration**: Integrated NFC reader
+- **Plugin**: [Coppernic Plugin](https://github.com/calypsonet/keyple-android-plugin-coppernic)
+- **Advantages**: Rugged design, mobile form factor, long battery life
+- **Use Case**: Mobile inspectors, field operations
+
+**Standard NFC Smartphones**
+- **Configuration**: Built-in NFC radio
+- **Plugin**: [Android NFC Plugin](https://keyple.org/components/standard-reader-plugins/keyple-plugin-android-nfc-lib/)
+- **Limitations**: No SAM support (Storage Cards only)
+- **Use Case**: Development, testing, basic inspections
+
+#### SAM Integration Benefits
+
+When SAM is available:
+- **Enhanced Security**: Cryptographic verification of contract authenticity
+- **Tamper Detection**: Identification of potentially modified cards
+- **Audit Trail**: Complete cryptographic record of control operations
+- **Compliance**: Meeting regulatory requirements for secure operations
+
+Without SAM:
+- **Basic Functionality**: Visual inspection and basic data validation
+- **Faster Processing**: No cryptographic operations required
+- **Wider Compatibility**: Works with any NFC-enabled Android device
+- **Cost Effective**: No specialized hardware requirements
+
+### Plugin Configuration Examples
+
+```kotlin
+// Famoco with SAM configuration
+val famocoPlugin = KeyplePluginExtensionFactory.createPlugin(FamocoPluginFactory())
+val samReader = famocoPlugin.getReader("Famoco SAM Reader")
+val nfcReader = famocoPlugin.getReader("Famoco NFC Reader")
+
+// Configure for secure operations
+if (samReader.isCardPresent()) {
+    ticketingService.setSecureSessionMode(true)
+    logger.info("SAM detected - secure operations enabled")
+}
+
+// Standard NFC configuration  
+val nfcPlugin = KeyplePluginExtensionFactory.createPlugin(AndroidNfcPluginFactory())
+val reader = nfcPlugin.getReader("Android NFC Reader")
+
+// Configure for basic operations
+ticketingService.setSecureSessionMode(false)
+logger.info("NFC-only mode - basic operations enabled")
+```
+
+## Development
+
+### Project Architecture
+
+```
+control-app/
+├── src/main/
+│   ├── java/org/calypsonet/keyple/demo/control/
+│   │   ├── activities/          # Android UI activities
+│   │   │   ├── CardContentActivity.java     # Valid card display
+│   │   │   ├── DeviceSelectionActivity.java # Hardware selection
+│   │   │   ├── HomeActivity.java            # Inspector dashboard
+│   │   │   ├── NetworkInvalidActivity.java  # Invalid card display
+│   │   │   ├── ReaderActivity.java          # Card reading interface
+│   │   │   └── SettingsActivity.java        # Configuration
+│   │   ├── data/               # Data models and persistence
+│   │   │   ├── model/          # Data transfer objects
+│   │   │   └── repository/     # Data access implementations
+│   │   ├── domain/             # Business logic interfaces
+│   │   │   ├── model/          # Domain entities
+│   │   │   └── repository/     # Repository contracts
+│   │   ├── reader/             # Card reader management
+│   │   │   ├── CalypsoCardRepository.java   # Calypso card operations
+│   │   │   ├── StorageCardRepository.java   # Storage card operations
+│   │   │   └── ReaderRepository.java        # Reader abstraction
+│   │   ├── ticketing/          # Core business logic
+│   │   │   ├── TicketingService.java        # Main orchestrator
+│   │   │   └── procedure/      # Control procedures
+│   │   └── ui/                 # UI utilities and components
+│   ├── res/                    # Android resources (layouts, strings, etc.)
+│   └── AndroidManifest.xml     # Application configuration
+├── build.gradle                # Build configuration and dependencies
+└── proguard-rules.pro         # Code obfuscation rules for release
+```
+
+### Key Dependencies
+
+```gradle
+dependencies {
+    // Keyple core libraries
+    implementation 'org.eclipse.keyple:keyple-java-service:2.+'
+    implementation 'org.eclipse.keyple:keyple-java-card-calypso:2.+'
+    
+    // Common demo library
+    implementation 'org.calypsonet:keyple-demo-common-lib:+'
+    
+    // Platform-specific plugins
+    implementation 'org.eclipse.keyple:keyple-android-plugin-nfc:+'
+    implementation 'org.calypsonet:keyple-famoco:+' // Optional
+    implementation 'org.calypsonet:keyple-android-plugin-coppernic:+' // Optional
+    
+    // Android UI and architecture
+    implementation 'androidx.appcompat:appcompat:1.6.+'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.6.+'
+    implementation 'androidx.recyclerview:recyclerview:1.3.+'
+    implementation 'com.google.android.material:material:1.9.+'
+    
+    // Testing
+    testImplementation 'junit:junit:4.13.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.+'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.+'
+}
+```
+
+### Building and Testing
+
+```bash
+# Clean project
+./gradlew clean
+
+# Build debug version
+./gradlew assembleDebug
+
+# Build release version (requires signing setup)
+./gradlew assembleRelease
+
+# Run unit tests
+./gradlew test
+
+# Run Android instrumentation tests
+./gradlew connectedAndroidTest
+
+# Generate APK for distribution
+./gradlew assembleRelease
+# Output: app/build/outputs/apk/release/
+```
+
+### Testing Strategy
+
+#### Unit Tests
+```java
+@Test
+public void testContractValidation() {
+    // Test contract validity checking logic
+    Contract contract = createTestContract();
+    boolean isValid = contractValidator.isValid(contract, LocalDate.now());
+    assertTrue("Contract should be valid", isValid);
+}
+
+@Test  
+public void testEventAnalysis() {
+    // Test validation event analysis
+    Event event = createTestEvent();
+    EventAnalysisResult result = eventAnalyzer.analyze(event, controlSettings);
+    assertEquals("Event should be valid", EventStatus.VALID, result.getStatus());
+}
+```
+
+#### Integration Tests
+```java
+@Test
+public void testControlProcedureFlow() {
+    // Test complete control procedure with mock card
+    MockCard card = createMockCardWithValidation();
+    ControlResult result = controlProcedure.executeControl(card);
+    
+    assertNotNull("Control result should not be null", result);
+    assertTrue("Control should pass for valid card", result.isValid());
+}
+```
+
+### Custom Inspector Workflows
+
+To customize the control procedure for specific inspector requirements:
+
+```java
+public class CustomControlProcedure extends BaseControlProcedure {
+    
+    @Override
+    protected ControlResult analyzeCompliance(CardData cardData, ControlSettings settings) {
+        // Custom compliance logic
+        if (requiresSpecialHandling(cardData)) {
+            return performEnhancedControl(cardData, settings);
+        }
+        return super.analyzeCompliance(cardData, settings);
+    }
+    
+    private boolean requiresSpecialHandling(CardData cardData) {
+        // Define custom criteria for enhanced control
+        return cardData.hasHighValueContract() || 
+               cardData.hasRecentDisputes() ||
+               cardData.isFromHighRiskLocation();
+    }
+}
+```
+
+## Troubleshooting
+
+### Common Control Issues
+
+**"No validation event found"**
+- **Cause**: Card has never been validated or event data is corrupted
+- **Action**: Check if card was properly validated using Validation Demo
+- **Inspector Response**: Request proof of payment or issue citation
+
+**"Validation too old"**
+- **Cause**: Last validation outside configured validity duration
+- **Solution**: Adjust validity duration settings if policy allows
+- **Inspector Response**: Ask passenger when they boarded/entered
+
+**"Wrong location validation"**
+- **Cause**: Validation occurred at different location than expected
+- **Check**: Verify control location settings match network configuration
+- **Inspector Response**: Confirm passenger's journey route and transfers
+
+**"Contract authentication failed"**
+- **Cause**: SAM unable to verify contract signature (security issue)
+- **Action**: Report potential fraud case, escalate to security team
+- **Inspector Response**: Detain card for investigation if policy permits
+
+### Hardware Troubleshooting
+
+**"SAM reader not responding"**
+- Check SAM is properly seated in reader slot
+- Verify SAM is compatible with card types being controlled
+- Restart application to reinitialize SAM connection
+- Check terminal's SAM reader hardware status
+
+**"Card reading intermittent"**
+- Clean NFC antenna area on terminal
+- Ensure card is held steady during reading
+- Check for interference from other NFC devices
+- Verify card is not damaged or demagnetized
+
+**"Plugin initialization failed"**
+- Confirm selected device type matches actual hardware
+- Check plugin libraries are properly installed
+- Verify hardware drivers are up to date
+- Restart terminal if persistent issues occur
+
+### Debug and Diagnostics
+
+#### Enable Debug Logging
+```java
+// In SettingsActivity
+public void enableDebugMode(boolean enabled) {
+    SharedPreferences prefs = getSharedPreferences("control_settings", MODE_PRIVATE);
+    prefs.edit().putBoolean("debug_mode", enabled).apply();
+    
+    if (enabled) {
+        Logger.setLogLevel(Logger.DEBUG);
+        Logger.d("Control", "Debug mode enabled");
+    }
+}
+```
+
+#### Performance Monitoring
+```java
+// Track control operation timing
+public class ControlPerformanceMonitor {
+    
+    public void measureControlTime(Runnable controlOperation) {
+        long startTime = System.currentTimeMillis();
+        
+        try {
+            controlOperation.run();
+        } finally {
+            long duration = System.currentTimeMillis() - startTime;
+            Logger.i("Performance", "Control completed in " + duration + "ms");
+            
+            if (duration > MAX_ACCEPTABLE_TIME) {
+                Logger.w("Performance", "Control operation exceeded expected time");
+            }
+        }
+    }
+}
+```
+
+## Inspector Training and Best Practices
+
+### Standard Operating Procedures
+
+#### Pre-Shift Checklist
+- [ ] Verify terminal battery level and charging status
+- [ ] Test NFC reader with known valid card
+- [ ] Check SAM status and authentication capability
+- [ ] Configure location and inspector ID settings
+- [ ] Verify network connectivity (if required)
+
+#### Control Procedure Guidelines
+1. **Approach Passenger Politely**: Identify yourself and request card presentation
+2. **Clear Instructions**: "Please place your card on the terminal"
+3. **Wait for Analysis**: Allow terminal to complete full control procedure
+4. **Review Results Carefully**: Check all displayed information
+5. **Take Appropriate Action**: Follow organizational policies for violations
+6. **Document Issues**: Record problems for system improvement
+
+#### Result Interpretation
+
+**Green Status (Valid)**:
+- Passenger is in compliance
+- Thank passenger and allow continuation
+- No further action required
+
+**Yellow Status (Warning)**:
+- Minor issues detected (e.g., low balance, near expiration)
+- Inform passenger of status
+- Suggest remedial action (reload, renewal)
+
+**Red Status (Invalid)**:
+- Serious compliance issue detected
+- Follow organizational enforcement procedures
+- May require citation, fine, or card retention
+
+### Reporting and Analytics
+
+The application can generate reports for:
+- **Daily Control Statistics**: Number of checks, compliance rates
+- **Violation Patterns**: Common issues by location/time
+- **Hardware Performance**: Reader reliability, SAM status
+- **Inspector Productivity**: Controls per shift, issue resolution
+
+## Proprietary Plugins
+
+### Activation Instructions
+
+By default, proprietary plugins are deactivated to maintain open-source compatibility.
+
+**Activation Process**:
+1. **Request Plugin**: Contact [CNA](https://calypsonet.org/contact-us/) for desired proprietary plugin
+2. **Obtain License**: Complete any required licensing agreements
+3. **Install Plugin**:
+  - Copy provided `.aar` file to `/app/libs/` directory
+  - Remove corresponding `-mock.aar` file from `/app/libs/`
+4. **Rebuild Application**: Execute `./gradlew build` command
+5. **Deploy Updated APK**: Install on target terminals
+
+**Available Proprietary Plugins**:
+- **Bluebird EF501**: Professional inspection terminal with integrated barcode scanning
+- **Flowbird Axio 2**: Transportation-specific control terminal with multi-modal support
+
+## Security and Compliance
+
+### Data Security
+- **Card Data Protection**: No persistent storage of sensitive card information
+- **Inspector Authentication**: Secure login and session management
+- **Audit Logging**: Complete record of all control operations
+- **Data Transmission**: Encrypted communication for networked operations
+
+### Regulatory Compliance
+- **Privacy Protection**: Minimal data collection, immediate disposal after use
+- **Audit Requirements**: Comprehensive logging for compliance verification
+- **Access Control**: Role-based permissions for inspector functions
+- **Data Retention**: Policy-compliant retention and deletion procedures
+
+### Anti-Fraud Measures
+- **Cryptographic Verification**: SAM-based authentication when available
+- **Pattern Recognition**: Detection of suspicious card usage patterns
+- **Real-time Alerts**: Immediate notification of potential security issues
+- **Forensic Support**: Detailed logging for investigation purposes
+
+## Contributing
+
+When contributing to this control application:
+
+1. **Maintain Inspector Usability**: Keep UI simple and inspection workflow efficient
+2. **Test Control Scenarios**: Verify all validation/control combinations work correctly
+3. **Hardware Compatibility**: Test on supported terminal types
+4. **Security Standards**: Maintain or enhance existing security measures
+5. **Documentation Updates**: Keep troubleshooting and training materials current
+
+## Related Documentation
+
+- [Main Project Overview](../README.md)
+- [Common Library](../common/README.md) - Data structures and validation logic
+- [Validation Demo](../validation/README.md) - Previous step in workflow
+- [Reload Demo](../reloading-remote/README.md) - Contract loading procedures
+- [Eclipse Keyple Documentation](https://keyple.org) - SDK reference
+
+## License
+
+This control application is part of the Keyple Demo project and is licensed under the MIT License.

@@ -1,91 +1,573 @@
-# Keyple Kotlin Multiplatform Distributed Client Demo App
+# Keyple Reload Demo - Kotlin Multiplatform Client
+
+[![Kotlin](https://img.shields.io/badge/kotlin-1.9+-blue.svg)](https://kotlinlang.org/)
+[![KMP](https://img.shields.io/badge/multiplatform-android%20%7C%20ios%20%7C%20desktop-green.svg)](https://www.jetbrains.com/kotlin-multiplatform/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+A Kotlin Multiplatform application demonstrating distributed remote client communications across Android, iOS, and desktop platforms using Keyple Distributed Client KMP libraries for seamless cross-platform card operations.
+
+[⬅️ Back to Main Project](../../../../README.md)
 
 ## Overview
 
-The **Keyple Distributed Client KMP Demo App** is a Kotlin Multiplatform app demonstrating distributed remote
-client communications across Android, iOS and desktop platforms. Its purpose is to demonstrate the use of 
-Keyple Distributed Client KMP libraries, that provide a distributed architecture layer
-for remote terminals, making it easier to develop cross-platform applications connecting to a Keyple server.
+This innovative client showcases the power of Kotlin Multiplatform by providing a single codebase that runs natively on multiple platforms while maintaining full functionality with the Keyple server ecosystem. It demonstrates modern cross-platform development practices for contactless card applications.
 
-It shows how to load contracts into a Calypso card, the whole ticketing process being managed remotely.
-Following the contract loading the card can pay presented to a validator running the
-[Keyple Demo Validation](https://github.com/calypsonet/keyple-demo-ticketing-validation-app) application and then checked with
-the [Keyple Demo Control](https://github.com/calypsonet/keyple-demo-ticketing-control-app) application.
+**Supported Platforms**:
+- **Android 7.0+** (API 24+) with native NFC support
+- **iOS 14+** with Core NFC integration
+- **JVM Desktop** (Windows/macOS/Linux) with PC/SC readers
 
-Read the main [README](https://github.com/calypsonet/keyple-demo-ticketing-reloading-remote#readme) to understand the purpose of this application.
+## Prerequisites
 
-## Documentation & Contribution Guide
-Full documentation available at [keyple.org](https://keyple.org)
+### Development Environment
+- **Android Studio** with Kotlin Multiplatform plugin
+- **Xcode** (for iOS development on macOS)
+- **JDK 17+** for desktop targets
+- **Kotlin 1.9+** with multiplatform support
 
-## Supported Platforms
-- Android 7.0+ (API 24+)
-- iOS 14+
-- JVM 17+
+### Platform-Specific Requirements
 
-## Using the demo app on a mobile device
-You need a Calypso card compatible with the keyple demo server. Ensure the card has the appropriate application installed and is suited to the SAM you have connected (Test or Prod keys).
+#### Android
+- Device with NFC capability
+- Android 7.0+ (API level 24+)
+- NFC enabled in system settings
 
-If you host your own keyple demo server, customize its URL on the app using the "Settings" icon.
+#### iOS
+- iPhone with NFC support (iPhone 7+)
+- iOS 14.0 or later
+- Core NFC entitlements configured
+- Apple Developer account for device deployment
 
-To setup your compatible cards use the "Settings" -> "Personalize" screen.
+#### Desktop
+- **PC/SC compatible reader** connected via USB
+- Platform-specific PC/SC libraries:
+  - **Windows**: Built-in PC/SC support
+  - **macOS**: PC/SC framework (usually pre-installed)
+  - **Linux**: `pcscd` daemon and `libpcsclite-dev`
 
-Then, you can use "Main screen" -> "Contactless support" to read the card.
+### Server Requirements
+- Running [Keyple Demo Server](../server/README.md) with SAM integration
+- Network connectivity from all target platforms
 
-The mobile device will start its NFC reader, and start hunting for a compatible NFC card.
+## Installation
 
-When detected, it will connect to the Keyple server, establish a secure session and read the card content.
+### Development Dependencies
 
-You can then select a new title to load, simulate a payment flow, and present the NFC card again to write the title onto it
-thought another secure session, driven by the remote Keyple server connected to a SAM.
+First, ensure the Keyple KMP dependencies are available in your local Maven repository:
 
-## Build
-The code is built with **Gradle** and targets **Android**, **iOS**, and **JVM** platforms.
-A recommended workflow is to checkout locally the "keyple-less" dependencies of this demo and publish them to your local maven repository.
+```bash
+# Clone and publish keyple-interop dependencies
+git clone https://github.com/eclipse-keyple/keyple-interop-jsonapi-client-kmp-lib
+cd keyple-interop-jsonapi-client-kmp-lib
+./gradlew publishToMavenLocal
 
-See the `README` file in each project:
-
-- https://github.com/eclipse-keyple/keyple-interop-jsonapi-client-kmp-lib 
-- https://github.com/eclipse-keyple/keyple-interop-localreader-nfcmobile-kmp-lib
-
-You can then use Android Studio to build the apps.
-
-### Android App
-Android app should build and run out of the box.
-
-### iOS App
-The easiest way is generally to start by opening the iosApp/iosApp.xcodeproj file in XCode, and configure 
-the app in "Signing and Capabilities" to allow "Automatically manage signing" and ensure your development iPhone is properly detected and ready to use.
-
-Once successfully configured, you should be able to use AndroidStudio to run your iOS app on your iPhone. 
-
-### desktop App
-*Prerequisite*: The desktop app needs a PCSC reader connected to the computer. Ensure PCSC and "java" are properly configured on your computer to 
-allow java programs to access your USB connected NFC reader. It's generally easy to do on Windows or Mac, not so much on Linux.
-
-In AndroidStudio, create a new "Run/Debug configuration", choose "Gradle", and add a "Run" command:
-
-```
-desktopRun -DmainClass=org.calypsonet.keyple.demo.reload.remote.MainKt -PcustomArgs="-filter=ACS"
+git clone https://github.com/eclipse-keyple/keyple-interop-localreader-nfcmobile-kmp-lib  
+cd keyple-interop-localreader-nfcmobile-kmp-lib
+./gradlew publishToMavenLocal
 ```
 
-where "-filter=" allows you to filter by name for the right PCSC reader to use (An "ACS" reader in this example).
+### Building the Project
 
-In "Gradle project", browse to "kmp:composeApp" module.
+```bash
+git clone https://github.com/calypsonet/keyple-demo-ticketing.git
+cd keyple-demo-ticketing/reloading-remote/client/interop-mobile-multiplatform
+```
 
-Save this configuration, and use it to run the app.
+#### Android App
+```bash
+./gradlew :composeApp:assembleDebug
+# Install on connected device
+./gradlew :composeApp:installDebug
+```
 
-## API Documentation
+#### iOS App
+1. Open `iosApp/iosApp.xcodeproj` in Xcode
+2. Configure signing in "Signing & Capabilities"
+3. Enable "Automatically manage signing"
+4. Select your development team
+5. Build and run on connected iPhone
 
-This is a Kotlin Multiplatform project targeting Android, iOS an desktop.
+#### Desktop App
+```bash
+# Windows/Mac/Linux
+./gradlew :composeApp:run
 
-* `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - `commonMain` is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    `iosMain` would be the right folder for such calls.
+# With PC/SC reader filter (example for ACS reader)
+./gradlew :composeApp:run -PcustomArgs="-filter=ACS"
+```
 
-* `/iosApp` contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform, 
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+## Configuration
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+### Cross-Platform Settings
+
+The application uses shared configuration across platforms:
+
+```kotlin
+// commonMain/kotlin/Config.kt
+object AppConfig {
+    const val SERVER_BASE_URL = "http://192.168.1.100:8080"
+    const val CONNECTION_TIMEOUT = 30_000L
+    const val READ_TIMEOUT = 60_000L
+    
+    val SUPPORTED_AIDS = listOf(
+        "A000000291FF9101",        // Keyple Generic
+        "315449432E49434131",      // CD Light GTML
+        "315449432E49434133",      // Calypso Light
+        "A0000004040125090101"     // Navigo IDF
+    )
+}
+```
+
+### Platform-Specific Configuration
+
+#### Android (`androidMain`)
+```kotlin
+// NFC configuration
+object AndroidNfcConfig {
+    const val DISCOVERY_TIMEOUT = 10_000L
+    const val PRESENCE_CHECK_DELAY = 500L
+    val SUPPORTED_TECHNOLOGIES = arrayOf(
+        NfcA::class.java.name,
+        IsoDep::class.java.name
+    )
+}
+```
+
+#### iOS (`iosMain`)
+```kotlin
+// Core NFC configuration
+object IosNfcConfig {
+    const val SESSION_TIMEOUT = 60.0
+    const val READER_SESSION_INVALIDATION_ERROR_MESSAGE = "Session ended"
+    val ISO14443_POLL_REQUEST_OPTIONS = mapOf(
+        "ISO14443PollingRequestCodeSystemCode" to false
+    )
+}
+```
+
+#### Desktop (`jvmMain`)
+```kotlin  
+// PC/SC configuration
+object DesktopPcscConfig {
+    const val READER_CONNECTION_TIMEOUT = 5_000L
+    const val CARD_DETECTION_POLLING_INTERVAL = 500L
+    val DEFAULT_READER_FILTER = ".*"
+}
+```
+
+## Usage
+
+### Mobile Platforms (Android/iOS)
+
+#### Initial Setup
+1. **Launch Application**
+2. **Configure Server**: Tap settings icon → Enter server URL
+3. **Grant Permissions**: Allow NFC access when prompted
+
+#### Card Personalization
+1. **Settings** → **Personalize**
+2. **Present Card** to device NFC reader
+3. **Wait for confirmation** of successful initialization
+
+#### Reading Card Content
+1. **Main Screen** → **Contactless Support**
+2. **Hold card** against device back (near NFC antenna)
+3. **View existing contracts** and their status
+4. **Select new title** to load if desired
+
+#### Contract Loading
+1. **Choose contract type** from available options
+2. **Complete payment simulation**
+3. **Present card again** when prompted
+4. **Receive confirmation** of successful loading
+
+### Desktop Platform
+
+#### Initial Setup
+1. **Connect PC/SC reader** via USB
+2. **Launch application** with reader filter:
+   ```bash
+   ./gradlew :composeApp:run -PcustomArgs="-filter=ACS"
+   ```
+3. **Verify reader detection** in application logs
+
+#### Card Operations
+1. **Place card** on connected PC/SC reader
+2. **Follow same workflow** as mobile platforms
+3. **Monitor operations** through desktop UI
+
+### Shared User Interface
+
+The application uses Compose Multiplatform for consistent UI across all platforms:
+
+```
+┌─────────────────────────────────────┐
+│            Main Screen              │
+│  ┌─────────────────────────────────┐│
+│  │         Settings                ││
+│  │  ┌─────────────────────────────┐││
+│  │  │  Server Configuration      │││
+│  │  │  Reader Settings           │││
+│  │  │  Personalization           │││
+│  │  └─────────────────────────────┘││
+│  └─────────────────────────────────┘│
+│  ┌─────────────────────────────────┐│
+│  │      Card Operations            ││
+│  │  • Read Card Content           ││
+│  │  • Load New Contracts          ││
+│  │  • View Transaction History    ││
+│  └─────────────────────────────────┘│
+└─────────────────────────────────────┘
+```
+
+## Technical Architecture
+
+### Multiplatform Structure
+
+```
+composeApp/
+├── commonMain/                    # Shared business logic
+│   ├── kotlin/
+│   │   ├── domain/               # Domain models and interfaces
+│   │   ├── data/                 # Data layer implementation
+│   │   ├── ui/                   # Compose UI components
+│   │   └── utils/                # Common utilities
+│   └── resources/                # Shared resources
+├── androidMain/                  # Android-specific code
+│   └── kotlin/
+│       ├── platform/             # Android NFC implementation
+│       └── di/                   # Android dependency injection
+├── iosMain/                      # iOS-specific code  
+│   └── kotlin/
+│       ├── platform/             # Core NFC implementation
+│       └── di/                   # iOS dependency injection
+├── jvmMain/                      # Desktop-specific code
+│   └── kotlin/
+│       ├── platform/             # PC/SC implementation
+│       └── di/                   # Desktop dependency injection
+└── nativeMain/                   # Native shared code (if any)
+```
+
+### Key Components
+
+#### Shared Business Logic (`commonMain`)
+
+**Domain Layer**:
+```kotlin
+interface CardRepository {
+    suspend fun readCard(): CardData
+    suspend fun writeContract(contract: ContractData): Result<Unit>
+}
+
+interface ServerService {
+    suspend fun getAvailableContracts(cardId: String): List<ContractOption>
+    suspend fun processContractLoading(request: LoadingRequest): LoadingResult
+}
+```
+
+**Data Layer**:
+```kotlin
+@Serializable
+data class CardData(
+    val serialNumber: String,
+    val applicationId: String,
+    val contracts: List<Contract>,
+    val environment: Environment
+)
+
+@Serializable
+data class Contract(
+    val index: Int,
+    val type: ContractType,
+    val validityEnd: LocalDate,
+    val remainingValue: Int?
+)
+```
+
+#### Platform-Specific Implementations
+
+**Android NFC** (`androidMain`):
+```kotlin
+class AndroidNfcCardRepository : CardRepository {
+    private val nfcAdapter: NfcAdapter = NfcAdapter.getDefaultAdapter(context)
+    
+    override suspend fun readCard(): CardData {
+        return withContext(Dispatchers.IO) {
+            // Android NFC implementation using Keyple Android NFC plugin
+            nfcManager.processCardDetection()
+        }
+    }
+}
+```
+
+**iOS Core NFC** (`iosMain`):
+```kotlin
+class IosNfcCardRepository : CardRepository {
+    override suspend fun readCard(): CardData {
+        return suspendCoroutine { continuation ->
+            // Core NFC implementation using Keyple iOS NFC plugin
+            nfcManager.startSession { result ->
+                continuation.resume(result)
+            }
+        }
+    }
+}
+```
+
+**Desktop PC/SC** (`jvmMain`):
+```kotlin
+class DesktopPcscCardRepository(private val readerFilter: String) : CardRepository {
+    private val pcscPlugin = PcscPluginFactory.createPlugin()
+    
+    override suspend fun readCard(): CardData {
+        return withContext(Dispatchers.IO) {
+            // PC/SC implementation using Keyple PC/SC plugin
+            pcscManager.connectToCard(readerFilter)
+        }
+    }
+}
+```
+
+### Dependency Injection
+
+Using Koin for multiplatform dependency injection:
+
+```kotlin
+// commonMain
+val commonModule = module {
+    single<ServerService> { ServerServiceImpl(get()) }
+    single<CardValidator> { CardValidatorImpl() }
+}
+
+// Platform-specific modules
+val androidModule = module {
+    single<CardRepository> { AndroidNfcCardRepository(androidContext()) }
+    single<NetworkManager> { AndroidNetworkManager(get()) }
+}
+
+val iosModule = module {
+    single<CardRepository> { IosNfcCardRepository() }
+    single<NetworkManager> { IosNetworkManager() }
+}
+
+val desktopModule = module {
+    single<CardRepository> { DesktopPcscCardRepository(getProperty("readerFilter")) }
+    single<NetworkManager> { DesktopNetworkManager() }
+}
+```
+
+## Development
+
+### Building for Different Platforms
+
+#### Android Development
+```bash
+# Debug build
+./gradlew :composeApp:assembleDebug
+
+# Release build with signing
+./gradlew :composeApp:assembleRelease
+
+# Run on connected device
+./gradlew :composeApp:installDebug
+```
+
+#### iOS Development
+1. **Xcode Setup**:
+  - Open `iosApp/iosApp.xcodeproj`
+  - Configure development team in signing
+  - Add NFC capability: `Signing & Capabilities` → `Near Field Communication Tag Reading`
+
+2. **Entitlements** (`iosApp/iosApp/iosApp.entitlements`):
+   ```xml
+   <key>com.apple.developer.nfc.readersession.formats</key>
+   <array>
+       <string>NDEF</string>
+       <string>TAG</string>
+   </array>
+   ```
+
+3. **Build and Run**:
+  - Use Xcode to build and deploy to iPhone
+  - Or use Android Studio's iOS run configuration
+
+#### Desktop Development
+```bash
+# Run with default settings
+./gradlew :composeApp:run
+
+# Run with custom PC/SC filter
+./gradlew :composeApp:run -PcustomArgs="-filter=ACS.*"
+
+# Package as executable
+./gradlew :composeApp:packageDistributionForCurrentOS
+```
+
+### Testing Strategy
+
+#### Unit Tests (`commonTest`)
+```kotlin
+class CardValidatorTest {
+    @Test
+    fun testValidCardData() {
+        val validator = CardValidator()
+        val cardData = createTestCardData()
+        
+        assertTrue(validator.isValid(cardData))
+    }
+}
+```
+
+#### Platform Tests
+```kotlin
+// androidUnitTest
+class AndroidNfcTest {
+    @Test
+    fun testNfcReaderInitialization() {
+        // Android-specific NFC tests
+    }
+}
+
+// iosTest  
+class IosNfcTest {
+    @Test
+    fun testCoreNfcSession() {
+        // iOS-specific Core NFC tests
+    }
+}
+```
+
+### Adding New Platforms
+
+To extend support to additional platforms:
+
+1. **Create platform source set**:
+   ```kotlin
+   // build.gradle.kts
+   kotlin {
+       tvos() // Example: Apple TV
+       watchos() // Example: Apple Watch
+   }
+   ```
+
+2. **Implement platform interfaces**:
+   ```kotlin
+   // tvosMain/kotlin/platform/TvosPlatformService.kt
+   class TvosPlatformService : PlatformService {
+       override fun getCardReader(): CardRepository {
+           // Platform-specific implementation
+       }
+   }
+   ```
+
+3. **Configure platform module**:
+   ```kotlin
+   val tvosModule = module {
+       single<CardRepository> { TvosCardRepository() }
+   }
+   ```
+
+## Troubleshooting
+
+### Common Issues Across Platforms
+
+**"Server connection failed"**
+- Verify server URL is accessible from target platform
+- Check network permissions on mobile platforms
+- Ensure firewall allows connections on desktop
+
+**"Card not detected"**
+- **Android**: Enable NFC in system settings, grant app permissions
+- **iOS**: Ensure Core NFC is supported (iPhone 7+), check entitlements
+- **Desktop**: Verify PC/SC reader connection and drivers
+
+### Platform-Specific Issues
+
+#### Android
+- **NFC not working**: Check `AndroidManifest.xml` for NFC permissions
+- **App crashes on card detection**: Verify NFC intent filters
+- **Slow card reading**: Adjust discovery timeout settings
+
+#### iOS
+- **Core NFC session errors**: Check entitlements and provisioning profile
+- **App rejection from App Store**: Ensure proper NFC usage description
+- **Session timeout**: Increase Core NFC session duration
+
+#### Desktop
+- **PC/SC service not available**: Start PC/SC daemon (`pcscd` on Linux)
+- **Reader not detected**: Check USB connection and driver installation
+- **Permission denied**: Run with appropriate user permissions
+
+### Debug Configuration
+
+Enable platform-specific logging:
+
+```kotlin
+// commonMain
+object Logger {
+    fun debug(tag: String, message: String) {
+        when (Platform.current) {
+            is Platform.Android -> android.util.Log.d(tag, message)
+            is Platform.Ios -> NSLog("$tag: $message")
+            is Platform.Desktop -> println("[$tag] $message")
+        }
+    }
+}
+```
+
+## Performance Optimization
+
+- **Coroutines**: Use structured concurrency for non-blocking operations
+- **Memory Management**: Proper cleanup of platform resources (NFC sessions, PC/SC connections)
+- **Network Caching**: Cache server responses to reduce bandwidth usage
+- **UI Responsiveness**: Offload card operations to background threads
+
+## Deployment
+
+### Android
+```bash
+# Generate signed APK
+./gradlew :composeApp:assembleRelease
+
+# Upload to Google Play Console
+# Or distribute via Firebase App Distribution
+```
+
+### iOS
+1. **Archive in Xcode**: Product → Archive
+2. **Upload to App Store Connect**
+3. **TestFlight Distribution** for beta testing
+4. **App Store Review** and release
+
+### Desktop
+```bash
+# Create platform-specific distributables
+./gradlew :composeApp:packageDistributionForCurrentOS
+
+# Results in build/compose/binaries/main/
+# - .dmg for macOS
+# - .msi for Windows  
+# - .deb/.rpm for Linux
+```
+
+## Contributing
+
+When contributing to this KMP client:
+
+1. **Maintain platform parity**: Ensure features work across all supported platforms
+2. **Follow KMP best practices**: Keep platform-specific code minimal
+3. **Test on all platforms**: Verify changes work on Android, iOS, and desktop
+4. **Update documentation**: Include platform-specific setup instructions
+5. **Performance considerations**: Profile on resource-constrained mobile devices
+
+## Related Documentation
+
+- [Kotlin Multiplatform Documentation](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)
+- [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/)
+- [Keyple Distributed Client KMP Libraries](https://github.com/eclipse-keyple/keyple-interop-jsonapi-client-kmp-lib)
+- [Main Project Overview](../../../../README.md)
+- [Server Documentation](../../server/README.md)
+
+## License
+
+This Kotlin Multiplatform client is part of the Keyple Demo project and is licensed under the MIT License.
