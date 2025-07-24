@@ -1,0 +1,36 @@
+name: Compile and Deploy Java Api to Maven Central
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish-snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code from ${{ github.repository }}/${{ github.ref }}
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Update permissions
+        working-directory: .
+        run: chmod +x ./gradlew ./.github/scripts/*.sh
+
+      - name: Check version
+        working-directory: .
+        run: ./.github/scripts/check_version.sh
+
+      - name: Build and publish snapshot to Maven Central
+        env:
+          ORG_GRADLE_PROJECT_sonatypeURL: https://central.sonatype.com/repository/maven-snapshots/
+          ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
+          ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}
+        run: |
+          echo "Building and publishing snapshot package..."
+          ./gradlew build publish --info --stacktrace

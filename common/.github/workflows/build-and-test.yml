@@ -1,0 +1,31 @@
+name: Compile and Test Java Api
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code from ${{ github.repository }}/${{ github.ref }}
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Update permissions
+        working-directory: .
+        run: chmod +x ./gradlew ./.github/scripts/*.sh
+
+      - name: Check version
+        working-directory: .
+        run: ./.github/scripts/check_version.sh
+
+      - name: Build and Test
+        working-directory: .
+        run: ./gradlew build --info --stacktrace

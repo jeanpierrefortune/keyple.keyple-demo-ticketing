@@ -1,0 +1,1 @@
+This document is the specification of the common library used by all Keyple demo applications.
