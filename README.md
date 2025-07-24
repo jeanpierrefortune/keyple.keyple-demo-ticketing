@@ -21,9 +21,9 @@ The Keyple Demo Ecosystem consists of three interconnected applications that sim
 
 ### Application Roles
 
-- **[Reload Demo](reloading-remote/)**: Remote contract loading using distributed client/server architecture
-- **[Validation Demo](validation/)**: Entry validation for transportation networks
-- **[Control Demo](control/)**: Post-validation card inspection and compliance checking
+- **[Reload Demo](src/reloading-remote/)**: Remote contract loading using distributed client/server architecture
+- **[Validation Demo](src/validation/)**: Entry validation for transportation networks
+- **[Control Demo](src/control/)**: Post-validation card inspection and compliance checking
 
 ## Supported Card Technologies
 
@@ -109,14 +109,14 @@ Contact [CNA](https://calypsonet.org/contact-us/) for access to proprietary term
 
 ## Data Model
 
-The ecosystem uses standardized data structures defined in the [Common Library](common/):
+The ecosystem uses standardized data structures defined in the [Common Library](src/common/):
 
 - **Environment Record**: Card metadata and validity information
 - **Event Log**: Transaction history and validation events
 - **Contract Records**: Transportation titles and their properties
 - **Counter Files**: Usage tracking for multi-trip and stored value
 
-See [Common Library Documentation](common/README.md) for detailed specifications.
+See [Common Library Documentation](src/common/README.md) for detailed specifications.
 
 ## Development
 

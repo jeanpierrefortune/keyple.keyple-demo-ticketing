@@ -6,7 +6,7 @@
 
 Android validation terminal application for checking transportation access authorization and creating validation events. This application represents the entry point to controlled transportation networks where passengers present their cards for validation.
 
-[⬅️ Back to Main Project](../README.md)
+[⬅️ Back to Main Project](../../README.md)
 
 ## Overview
 
@@ -518,7 +518,7 @@ When contributing to this validation application:
 
 ## Related Documentation
 
-- [Main Project Overview](../README.md)
+- [Main Project Overview](../../README.md)
 - [Common Library](../common/README.md) - Data structures and constants
 - [Reload Demo](../reloading-remote/README.md) - Contract loading process
 - [Control Demo](../control/README.md) - Post-validation verification

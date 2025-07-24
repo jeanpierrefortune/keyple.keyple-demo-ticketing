@@ -6,7 +6,7 @@
 
 Android control terminal application for post-validation inspection of transportation cards. This application represents the final verification step in the ticketing workflow, allowing inspectors to verify the validity of validation events and contract usage.
 
-[⬅️ Back to Main Project](../README.md)
+[⬅️ Back to Main Project](../../README.md)
 
 ## Overview
 
@@ -670,7 +670,7 @@ When contributing to this control application:
 
 ## Related Documentation
 
-- [Main Project Overview](../README.md)
+- [Main Project Overview](../../README.md)
 - [Common Library](../common/README.md) - Data structures and validation logic
 - [Validation Demo](../validation/README.md) - Previous step in workflow
 - [Reload Demo](../reloading-remote/README.md) - Contract loading procedures
