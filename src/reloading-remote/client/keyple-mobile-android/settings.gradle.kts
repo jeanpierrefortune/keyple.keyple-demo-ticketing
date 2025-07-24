@@ -1,5 +1,6 @@
 rootProject.name = "keyple-demo-ticketing-reloading-android-app"
 include (":app")
+includeBuild("../../../common")
 
 pluginManagement {
     repositories {

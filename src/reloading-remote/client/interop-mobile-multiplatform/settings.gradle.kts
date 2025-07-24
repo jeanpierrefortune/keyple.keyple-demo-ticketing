@@ -1,6 +1,7 @@
 rootProject.name = "keyple-demo-ticketing-reloading-interop-app"
 
 include(":composeApp")
+includeBuild("../../../common")
 
 pluginManagement {
   repositories {

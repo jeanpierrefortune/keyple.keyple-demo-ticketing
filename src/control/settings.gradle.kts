@@ -1,6 +1,6 @@
 rootProject.name = "keyple-demo-ticketing-control-app"
 include (":app")
-
+includeBuild("../common")
 pluginManagement {
     repositories {
         gradlePluginPortal()
