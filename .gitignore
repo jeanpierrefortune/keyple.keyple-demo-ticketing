@@ -1,20 +1,29 @@
+# Built application files
+*.apk
+#*.aar For ".aar" files in "libs" directory
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
 # Node JS specific
 package-lock.json
 src/main/resources/META-INF/
 node_modules/
 
-# Java class files
-*.class
-
 # Generated files
 gen/
 out/
 release/
-local.properties
 
 # Gradle
 .gradle/
-build*/
+build/
+.kotlin/
 
 # Eclipse
 .classpath
@@ -37,6 +46,15 @@ bin/
 
 # MacOS
 .DS_Store
+captures
+.externalNativeBuild
+.cxx
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
 
 # Linux
 *~
@@ -47,3 +65,6 @@ Thumbs.db:encryptable
 ehthumbs.db
 ehthumbs_vista.db
 *.stackdump
+
+# Android Studio
+*local.properties
