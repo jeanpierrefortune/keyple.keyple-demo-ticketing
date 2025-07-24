@@ -43,7 +43,7 @@ dependencies {
   implementation("org.eclipse.keyple:keyple-plugin-android-omapi-java-lib:2.1.0")
   // End Keyple configuration
   // Keyple reader plugins proprietary libs
-  implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
+  implementation(fileTree(mapOf("dir" to "../../../../../libs", "include" to listOf("*.jar", "*.aar"))))
   // Android components
   implementation("androidx.appcompat:appcompat:1.6.1")
   implementation("com.google.android.material:material:1.10.0")
@@ -169,7 +169,7 @@ tasks {
   spotless {
     kotlin {
       target("src/**/*.kt")
-      licenseHeaderFile("${project.rootDir}/LICENSE_HEADER")
+      licenseHeaderFile("${project.rootDir}/../../../LICENSE_HEADER")
       ktfmt()
     }
     kotlinGradle {

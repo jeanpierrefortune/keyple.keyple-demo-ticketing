@@ -39,7 +39,7 @@ dependencies {
   implementation("org.eclipse.keyple:keyple-plugin-android-nfc-java-lib:3.1.0")
   // End Keyple configuration
   // Keyple reader plugins proprietary libs
-  implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
+  implementation(fileTree(mapOf("dir" to "../../../libs", "include" to listOf("*.jar", "*.aar"))))
   // Other Keyple reader plugins
   implementation("org.calypsonet.keyple:keyple-plugin-cna-coppernic-cone2-java-lib:2.0.2")
   implementation("org.calypsonet.keyple:keyple-plugin-cna-famoco-se-communication-java-lib:2.0.2")
@@ -157,7 +157,7 @@ tasks {
   spotless {
     kotlin {
       target("src/**/*.kt")
-      licenseHeaderFile("${project.rootDir}/LICENSE_HEADER")
+      licenseHeaderFile("${project.rootDir}/../../LICENSE_HEADER")
       ktfmt()
     }
     kotlinGradle {

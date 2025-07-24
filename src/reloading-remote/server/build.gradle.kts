@@ -40,7 +40,7 @@ dependencies {
   implementation("org.eclipse.keypop:keypop-storagecard-java-api:0.3.0")
 
   // CNA specific components
-  implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+  implementation(fileTree(mapOf("dir" to "../../libs", "include" to listOf("*.jar"))))
 
   // Quarkus
   implementation(enforcedPlatform("io.quarkus:quarkus-universe-bom:1.8.1.Final"))
@@ -116,7 +116,7 @@ tasks {
   spotless {
     java {
       target("src/**/*.java")
-      licenseHeaderFile("${project.rootDir}/LICENSE_HEADER")
+      licenseHeaderFile("${project.rootDir}/../../../LICENSE_HEADER")
       importOrder("java", "javax", "org", "com", "")
       removeUnusedImports()
       googleJavaFormat()

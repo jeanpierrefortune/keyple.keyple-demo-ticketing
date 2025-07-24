@@ -129,16 +129,16 @@ See [Common Library Documentation](src/common/README.md) for detailed specificat
 ### Project Structure
 ```
 keyple-demo-ticketing/
-├── README.md                    # This file
-├── common/                      # Shared data structures and utilities
-├── reloading-remote/            # Remote reload clients and server
-│   ├── server/                 # Java server application
+├── README.md                               # This file
+├── src/common/                             # Shared data structures and utilities
+├── src/reloading-remote/                   # Remote reload clients and server
+│   ├── server/                             # Java server application
 │   ├── client/
-│   │   ├── keyple-mobile-android/     # Android native client
-│   │   ├── pc-dotnet/                 # .NET desktop client  
-│   │   └── interop-mobile-multiplatform/ # Kotlin Multiplatform client
-├── validation/                  # Android validation terminal
-└── control/                     # Android control terminal
+│   │   ├── keyple-mobile-android/          # Android native client
+│   │   ├── pc-dotnet/                      # .NET desktop client  
+│   │   └── interop-mobile-multiplatform/   # Kotlin Multiplatform client
+├── src/validation/                         # Android validation terminal
+└── src/control/                            # Android control terminal
 ```
 
 ### Building from Source
