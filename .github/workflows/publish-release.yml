@@ -1,0 +1,118 @@
+name: Build and Publish Release
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+jobs:
+  # ========================================
+  # ANDROID APPLICATIONS
+  # ========================================
+
+  build-ticketing-control-app:
+    name: "Ticketing Control App (Android)"
+    uses: ./.github/workflows/reusable-android-gradle-build.yml
+    with:
+      component-name: "Ticketing Control App"
+      working-directory: "./src/control/"
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-reloading-multiplatform-client-android:
+    name: "Reloading Multiplatform Client (Android)"
+    uses: ./.github/workflows/reusable-android-gradle-build.yml
+    with:
+      component-name: "Reloading Multiplatform Client"
+      working-directory: "./src/reloading-remote/client/interop-mobile-multiplatform/"
+      apk-output-path: "composeApp/build/outputs/apk/debug/*.apk"
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-reloading-keyple-client-android:
+    name: "Reloading Keyple Client (Android)"
+    uses: ./.github/workflows/reusable-android-gradle-build.yml
+    with:
+      component-name: "Reloading Keyple Client"
+      working-directory: "./src/reloading-remote/client/keyple-mobile-android/"
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-validation-app:
+    name: "Validation App (Android)"
+    uses: ./.github/workflows/reusable-android-gradle-build.yml
+    with:
+      component-name: "Validation App"
+      working-directory: "./src/validation/"
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ========================================
+  # SERVER APPLICATION
+  # ========================================
+
+  build-reloading-server:
+    name: "Reloading Server (Java + Node.js)"
+    uses: ./.github/workflows/reusable-java-node-hybrid-build.yml
+    with:
+      component-name: "Reloading Server"
+      working-directory: "./src/reloading-remote/server/"
+      node-directory: "./dashboard-app"
+      node-version: "16"
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ========================================
+  # DESKTOP APPLICATIONS - MULTIPLATFORM
+  # ========================================
+
+  build-reloading-multiplatform-client-macos:
+    name: "Reloading Multiplatform Client (macOS)"
+    uses: ./.github/workflows/reusable-desktop-multiplatform-build.yml
+    with:
+      component-name: "Reloading Multiplatform Client"
+      target-os: "macos-latest"
+      platform-name: "macOS"
+      working-directory: "./src/reloading-remote/client/interop-mobile-multiplatform/"
+      platform-artifact-patterns: '["composeApp/build/compose/binaries/main/dmg/*.dmg"]'
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-reloading-multiplatform-client-linux:
+    name: "Reloading Multiplatform Client (Linux)"
+    uses: ./.github/workflows/reusable-desktop-multiplatform-build.yml
+    with:
+      component-name: "Reloading Multiplatform Client"
+      target-os: "ubuntu-latest"
+      platform-name: "Linux"
+      working-directory: "./src/reloading-remote/client/interop-mobile-multiplatform/"
+      platform-artifact-patterns: '["composeApp/build/compose/binaries/main/deb/*.deb"]'
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-reloading-multiplatform-client-windows:
+    name: "Reloading Multiplatform Client (Windows)"
+    uses: ./.github/workflows/reusable-desktop-multiplatform-build.yml
+    with:
+      component-name: "Reloading Multiplatform Client"
+      target-os: "windows-latest"
+      platform-name: "Windows"
+      working-directory: "./src/reloading-remote/client/interop-mobile-multiplatform/"
+      platform-artifact-patterns: '["composeApp/build/compose/binaries/main/msi/*.msi"]'
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ========================================
+  # .NET APPLICATIONS
+  # ========================================
+
+  build-reloading-dotnet-client:
+    name: "Reloading .NET Client (Windows)"
+    uses: ./.github/workflows/reusable-dotnet-build.yml
+    with:
+      component-name: "Reloading .NET Client"
+      working-directory: "./src/reloading-remote/client/pc-dotnet/"
+      archive-name-prefix: "keyple-demo-ticketing-reloading-pc-dotnet-app"
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
