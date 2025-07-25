@@ -6,8 +6,6 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
   java
-  `maven-publish`
-  signing
   id("com.diffplug.spotless") version "7.0.4"
   id("io.quarkus") version "1.8.1.Final"
 }
@@ -75,7 +73,6 @@ val startServer by
 
 tasks {
   clean { delete("dashboard-app/build") }
-  javadoc { dependsOn.add("copyDashboard") }
   jar { dependsOn.add("copyDashboard") }
 }
 
@@ -97,17 +94,6 @@ java {
   sourceCompatibility = JavaVersion.toVersion(javaSourceLevel)
   targetCompatibility = JavaVersion.toVersion(javaTargetLevel)
   println("Compiling Java $sourceCompatibility to Java $targetCompatibility.")
-  withJavadocJar()
-  withSourcesJar()
-}
-
-fun copyLicenseFiles() {
-  val metaInfDir = File(layout.buildDirectory.get().asFile, "resources/main/META-INF")
-  val licenseFile = File("../../../", "LICENSE")
-  val noticeFile = File("../../../", "NOTICE.md")
-  metaInfDir.mkdirs()
-  licenseFile.copyTo(File(metaInfDir, "LICENSE"), overwrite = true)
-  noticeFile.copyTo(File(metaInfDir, "NOTICE.md"), overwrite = true)
 }
 
 tasks {
@@ -127,126 +113,5 @@ tasks {
   test {
     useJUnitPlatform()
     testLogging { events("passed", "skipped", "failed") }
-  }
-  javadoc {
-    dependsOn(processResources)
-    val javadocLogo = project.findProperty("javadoc.logo") as String
-    val javadocCopyright = project.findProperty("javadoc.copyright") as String
-    val titleProperty = project.findProperty("title") as String
-    (options as StandardJavadocDocletOptions).apply {
-      overview = "src/main/javadoc/overview.html"
-      windowTitle = "$titleProperty - ${project.version}"
-      header(
-          "<div style=\"margin-top: 7px\">$javadocLogo $titleProperty - ${project.version}</div>")
-      docTitle("$titleProperty - ${project.version}")
-      use(true)
-      bottom(javadocCopyright)
-      encoding = "UTF-8"
-      charSet = "UTF-8"
-      if (JavaVersion.current().isJava11Compatible) {
-        addBooleanOption("html5", true)
-        addStringOption("Xdoclint:none", "-quiet")
-      }
-    }
-    doFirst { println("Generating Javadoc for ${project.name} version ${project.version}") }
-  }
-  jar {
-    dependsOn(processResources)
-    doFirst { copyLicenseFiles() }
-    manifest {
-      attributes(
-          mapOf(
-              "Implementation-Title" to (project.findProperty("title") as String),
-              "Implementation-Version" to project.version,
-              "Implementation-Vendor" to (project.findProperty("organization.name") as String),
-              "Implementation-URL" to (project.findProperty("project.url") as String),
-              "Specification-Title" to (project.findProperty("title") as String),
-              "Specification-Version" to project.version,
-              "Specification-Vendor" to (project.findProperty("organization.name") as String),
-              "Created-By" to
-                  "${System.getProperty("java.version")} (${System.getProperty("java.vendor")})",
-              "Build-Jdk" to System.getProperty("java.version")))
-    }
-  }
-  named<Jar>("sourcesJar") {
-    doFirst { copyLicenseFiles() }
-    manifest {
-      attributes(
-          mapOf(
-              "Implementation-Title" to "${project.findProperty("title") as String} Sources",
-              "Implementation-Version" to project.version))
-    }
-  }
-  named<Jar>("javadocJar") {
-    dependsOn(javadoc)
-    doFirst { copyLicenseFiles() }
-    manifest {
-      attributes(
-          mapOf(
-              "Implementation-Title" to "${project.findProperty("title") as String} Documentation",
-              "Implementation-Version" to project.version))
-    }
-  }
-}
-
-publishing {
-  publications {
-    create<MavenPublication>("mavenJava") {
-      from(components["java"])
-      pom {
-        name.set(project.findProperty("title") as String)
-        description.set(project.findProperty("description") as String)
-        url.set(project.findProperty("project.url") as String)
-        licenses {
-          license {
-            name.set(project.findProperty("license.name") as String)
-            url.set(project.findProperty("license.url") as String)
-            distribution.set(project.findProperty("license.distribution") as String)
-          }
-        }
-        developers {
-          developer {
-            name.set(project.findProperty("developer.name") as String)
-            email.set(project.findProperty("developer.email") as String)
-          }
-        }
-        organization {
-          name.set(project.findProperty("organization.name") as String)
-          url.set(project.findProperty("organization.url") as String)
-        }
-        scm {
-          connection.set(project.findProperty("scm.connection") as String)
-          developerConnection.set(project.findProperty("scm.developerConnection") as String)
-          url.set(project.findProperty("scm.url") as String)
-        }
-        ciManagement {
-          system.set(project.findProperty("ci.system") as String)
-          url.set(project.findProperty("ci.url") as String)
-        }
-        properties.set(
-            mapOf(
-                "project.build.sourceEncoding" to "UTF-8",
-                "maven.compiler.source" to javaSourceLevel,
-                "maven.compiler.target" to javaTargetLevel))
-      }
-    }
-  }
-  repositories {
-    maven {
-      if (project.hasProperty("sonatypeURL")) {
-        url = uri(project.property("sonatypeURL") as String)
-        credentials {
-          username = project.property("sonatypeUsername") as String
-          password = project.property("sonatypePassword") as String
-        }
-      }
-    }
-  }
-}
-
-signing {
-  if (project.hasProperty("releaseTag")) {
-    useGpgCmd()
-    sign(publishing.publications["mavenJava"])
   }
 }
