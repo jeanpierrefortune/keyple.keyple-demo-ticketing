@@ -1,0 +1,94 @@
+name: Reusable .NET Build
+
+on:
+  workflow_call:
+    inputs:
+      component-name:
+        description: 'Name of the component being built'
+        required: true
+        type: string
+      working-directory:
+        description: 'Working directory for the build'
+        required: true
+        type: string
+      dotnet-version:
+        description: '.NET version to use'
+        required: false
+        type: string
+        default: '7.0.x'
+      solution-file:
+        description: 'Solution file name'
+        required: false
+        type: string
+        default: 'App.sln'
+      target-runtime:
+        description: 'Target runtime for publish'
+        required: false
+        type: string
+        default: 'win-x64'
+      publish-directory:
+        description: 'Directory for published output'
+        required: false
+        type: string
+        default: './publish'
+      archive-name-prefix:
+        description: 'Prefix for the archive name'
+        required: true
+        type: string
+      prepare-script-path:
+        description: 'Path to library preparation script (relative to repo root). Leave empty to skip preparation.'
+        required: false
+        type: string
+        default: ''
+    secrets:
+      GITHUB_TOKEN:
+        required: true
+
+jobs:
+  build-dotnet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code from ${{ github.repository }}/${{ github.ref }}
+        uses: actions/checkout@v4
+
+      - name: Setup .NET ${{ inputs.dotnet-version }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
+
+      - name: Update permissions for ${{ inputs.component-name }}
+        working-directory: .
+        run: chmod +x ./.github/scripts/*.sh
+
+      - name: Prepare libraries for ${{ inputs.component-name }}
+        if: ${{ inputs.prepare-script-path != '' }}
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          SCRIPT_PATH="../${{ inputs.prepare-script-path }}"
+          if [ -f "$SCRIPT_PATH" ]; then
+            echo "🔧 Executing library preparation script: ${{ inputs.prepare-script-path }}"
+            chmod +x "$SCRIPT_PATH"
+            bash "$SCRIPT_PATH" "${{ inputs.component-name }}" "$(pwd)"
+          else
+            echo "⚠️  Library preparation script not found: ${{ inputs.prepare-script-path }}"
+            echo "Proceeding with standard build..."
+          fi
+
+      - name: Build, test, and publish ${{ inputs.component-name }}
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          dotnet restore
+          dotnet format --verify-no-changes ${{ inputs.solution-file }}
+          dotnet test --no-build --verbosity normal
+          dotnet publish -c Release -r ${{ inputs.target-runtime }} --no-restore -o ${{ inputs.publish-directory }}
+
+      - name: Archive ${{ inputs.component-name }} application
+        working-directory: ${{ inputs.working-directory }}${{ inputs.publish-directory }}
+        run: |
+          zip -j -r "../${{ inputs.archive-name-prefix }}-${{ github.ref_name }}.zip" ./*
+
+      - name: Upload ${{ inputs.component-name }} artifacts to GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ inputs.working-directory }}/${{ inputs.archive-name-prefix }}-${{ github.ref_name }}.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
