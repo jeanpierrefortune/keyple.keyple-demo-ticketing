@@ -169,7 +169,7 @@ tasks {
   spotless {
     kotlin {
       target("src/**/*.kt")
-      licenseHeaderFile("${project.rootDir}/../../../LICENSE_HEADER")
+      licenseHeaderFile("../../../LICENSE_HEADER")
       ktfmt()
     }
     kotlinGradle {

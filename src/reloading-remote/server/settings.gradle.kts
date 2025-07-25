@@ -2,7 +2,9 @@ rootProject.name = "keyple-demo-ticketing-reloading-server"
 
 include(":app")
 
-includeBuild("../../common")
+include(":common")
+
+project(":common").projectDir = file("../../common")
 
 pluginManagement {
   repositories {
@@ -21,4 +23,5 @@ dependencyResolutionManagement {
     google()
     maven(url = "https://central.sonatype.com/repository/maven-snapshots")
   }
+  versionCatalogs { create("libs") { from(files("../../../libs.versions.toml")) } }
 }

@@ -1,9 +1,11 @@
 #!/bin/sh
 
-tag=$1
+dir=$1
+tag=$2
+echo "Input dir: '$dir'"
 echo "Input tag: '$tag'"
 
-version=`grep "^version" gradle.properties | cut -d= -f2 | tr -d "[:space:]"`
+version=`grep "^version" $dir/gradle.properties | cut -d= -f2 | tr -d "[:space:]"`
 echo "Version in 'gradle.properties' file: '$version'"
 
 if [ "$tag" != "" ]; then

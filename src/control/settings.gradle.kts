@@ -18,5 +18,10 @@ dependencyResolutionManagement {
         google()
         maven(url = "https://central.sonatype.com/repository/maven-snapshots")
     }
+    versionCatalogs {
+        create("libs") {
+            from(files("../../libs.versions.toml"))
+        }
+    }
 }
 

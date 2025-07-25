@@ -7,7 +7,41 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish-release-server:
+  publish-release-control:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code from ${{ github.repository }}/${{ github.ref }}
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Update permissions
+        working-directory: .
+        run: chmod +x ./src/control/gradlew ./.github/scripts/*.sh
+
+      - name: Build artifacts
+        env:
+          ORG_GRADLE_PROJECT_releaseTag: ${{ github.event.release.tag_name }}
+        working-directory: ./src/control/
+        run: ./gradlew build
+
+      - name: Collect artifacts
+        working-directory: ./src/control/
+        run: |
+          mkdir -p release-artifacts
+          cp app/build/outputs/apk/debug/*.apk release-artifacts/ || true
+
+      - name: Upload artifacts to GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./src/control/release-artifacts/*
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+  publish-release-reloading-server:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code from ${{ github.repository }}/${{ github.ref }}
@@ -26,12 +60,12 @@ jobs:
 
       - name: Update permissions
         working-directory: .
-        run: chmod +x ./server/gradlew ./.github/scripts/*.sh
+        run: chmod +x ./src/reloading-remote/server/gradlew ./.github/scripts/*.sh
 
       - name: Build artifacts
         env:
           ORG_GRADLE_PROJECT_releaseTag: ${{ github.event.release.tag_name }}
-        working-directory: ./server/
+        working-directory: ./src/reloading-remote/server/
         run: |
           cd ./dashboard-app
           npm install
@@ -39,7 +73,7 @@ jobs:
           ./gradlew build
 
       - name: Collect artifacts
-        working-directory: ./server/
+        working-directory: ./src/reloading-remote/server/
         run: |
           mkdir -p release-artifacts
           cp build/*-full.jar release-artifacts/ || true
@@ -47,10 +81,10 @@ jobs:
       - name: Upload artifacts to GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: server/release-artifacts/*
+          files: ./src/reloading-remote/server/release-artifacts/*
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  publish-release-client-interop-mobile-multiplatform-android:
+  publish-release-reloading-client-interop-mobile-multiplatform-android:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code from ${{ github.repository }}/${{ github.ref }}
@@ -64,16 +98,16 @@ jobs:
 
       - name: Update permissions
         working-directory: .
-        run: chmod +x ./client/interop-mobile-multiplatform/gradlew ./.github/scripts/*.sh
+        run: chmod +x ./src/reloading-remote/client/interop-mobile-multiplatform/gradlew ./.github/scripts/*.sh
 
       - name: Build artifacts
         env:
           ORG_GRADLE_PROJECT_releaseTag: ${{ github.event.release.tag_name }}
-        working-directory: ./client/interop-mobile-multiplatform/
+        working-directory: ./src/reloading-remote/client/interop-mobile-multiplatform/
         run: ./gradlew build
 
       - name: Collect artifacts
-        working-directory: ./client/interop-mobile-multiplatform/
+        working-directory: ./src/reloading-remote/client/interop-mobile-multiplatform/
         run: |
           mkdir -p release-artifacts
           cp composeApp/build/outputs/apk/debug/*.apk release-artifacts/ || true
@@ -81,10 +115,10 @@ jobs:
       - name: Upload artifacts to GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: client/interop-mobile-multiplatform/release-artifacts/*
+          files: ./src/reloading-remote/client/interop-mobile-multiplatform/release-artifacts/*
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  publish-release-client-interop-mobile-multiplatform-desktop-macos:
+  publish-release-reloading-client-interop-mobile-multiplatform-desktop-macos:
     runs-on: macos-latest
     steps:
       - name: Check out repository code from ${{ github.repository }}/${{ github.ref }}
@@ -98,16 +132,16 @@ jobs:
 
       - name: Update permissions
         working-directory: .
-        run: chmod +x ./client/interop-mobile-multiplatform/gradlew ./.github/scripts/*.sh
+        run: chmod +x ./src/reloading-remote/client/interop-mobile-multiplatform/gradlew ./.github/scripts/*.sh
 
       - name: Build artifacts
         env:
           ORG_GRADLE_PROJECT_releaseTag: ${{ github.event.release.tag_name }}
-        working-directory: ./client/interop-mobile-multiplatform/
+        working-directory: ./src/reloading-remote/client/interop-mobile-multiplatform/
         run: ./gradlew packageDistributionForCurrentOS packageUberJarForCurrentOS
 
       - name: Collect artifacts
-        working-directory: ./client/interop-mobile-multiplatform/
+        working-directory: ./src/reloading-remote/client/interop-mobile-multiplatform/
         run: |
           mkdir -p release-artifacts
           cp composeApp/build/compose/binaries/main/dmg/*.dmg release-artifacts/ || true
@@ -116,10 +150,10 @@ jobs:
       - name: Upload artifacts to GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: client/interop-mobile-multiplatform/release-artifacts/*
+          files: ./src/reloading-remote/client/interop-mobile-multiplatform/release-artifacts/*
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  publish-release-client-interop-mobile-multiplatform-desktop-linux:
+  publish-release-reloading-client-interop-mobile-multiplatform-desktop-linux:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code from ${{ github.repository }}/${{ github.ref }}
@@ -133,16 +167,16 @@ jobs:
 
       - name: Update permissions
         working-directory: .
-        run: chmod +x ./client/interop-mobile-multiplatform/gradlew ./.github/scripts/*.sh
+        run: chmod +x ./src/reloading-remote/client/interop-mobile-multiplatform/gradlew ./.github/scripts/*.sh
 
       - name: Build artifacts
         env:
           ORG_GRADLE_PROJECT_releaseTag: ${{ github.event.release.tag_name }}
-        working-directory: ./client/interop-mobile-multiplatform/
+        working-directory: ./src/reloading-remote/client/interop-mobile-multiplatform/
         run: ./gradlew packageDistributionForCurrentOS packageUberJarForCurrentOS
 
       - name: Collect artifacts
-        working-directory: ./client/interop-mobile-multiplatform/
+        working-directory: ./src/reloading-remote/client/interop-mobile-multiplatform/
         run: |
           mkdir -p release-artifacts
           cp composeApp/build/compose/binaries/main/deb/*.deb release-artifacts/ || true
@@ -151,10 +185,10 @@ jobs:
       - name: Upload artifacts to GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: client/interop-mobile-multiplatform/release-artifacts/*
+          files: ./src/reloading-remote/client/interop-mobile-multiplatform/release-artifacts/*
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  publish-release-client-interop-mobile-multiplatform-desktop-windows:
+  publish-release-reloading-client-interop-mobile-multiplatform-desktop-windows:
     runs-on: windows-latest
     steps:
       - name: Check out repository code from ${{ github.repository }}/${{ github.ref }}
@@ -168,16 +202,16 @@ jobs:
 
       - name: Update permissions
         working-directory: .
-        run: chmod +x ./client/interop-mobile-multiplatform/gradlew ./.github/scripts/*.sh
+        run: chmod +x ./src/reloading-remote/client/interop-mobile-multiplatform/gradlew ./.github/scripts/*.sh
 
       - name: Build artifacts
         env:
           ORG_GRADLE_PROJECT_releaseTag: ${{ github.event.release.tag_name }}
-        working-directory: ./client/interop-mobile-multiplatform/
+        working-directory: ./src/reloading-remote/client/interop-mobile-multiplatform/
         run: ./gradlew packageDistributionForCurrentOS packageUberJarForCurrentOS
 
       - name: Collect artifacts
-        working-directory: ./client/interop-mobile-multiplatform/
+        working-directory: ./src/reloading-remote/client/interop-mobile-multiplatform/
         run: |
           mkdir -p release-artifacts
           cp composeApp/build/compose/binaries/main/msi/*.msi release-artifacts/ || true
@@ -186,10 +220,10 @@ jobs:
       - name: Upload artifacts to GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: client/interop-mobile-multiplatform/release-artifacts/*
+          files: ./src/reloading-remote/client/interop-mobile-multiplatform/release-artifacts/*
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  publish-release-client-keyple-mobile-android:
+  publish-release-reloading-client-keyple-mobile-android:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code from ${{ github.repository }}/${{ github.ref }}
@@ -203,16 +237,16 @@ jobs:
 
       - name: Update permissions
         working-directory: .
-        run: chmod +x ./client/keyple-mobile-android/gradlew ./.github/scripts/*.sh
+        run: chmod +x ./src/reloading-remote/client/keyple-mobile-android/gradlew ./.github/scripts/*.sh
 
       - name: Build artifacts
         env:
           ORG_GRADLE_PROJECT_releaseTag: ${{ github.event.release.tag_name }}
-        working-directory: ./client/keyple-mobile-android/
+        working-directory: ./src/reloading-remote/client/keyple-mobile-android/
         run: ./gradlew build
 
       - name: Collect artifacts
-        working-directory: ./client/keyple-mobile-android/
+        working-directory: ./src/reloading-remote/client/keyple-mobile-android/
         run: |
           mkdir -p release-artifacts
           cp app/build/outputs/apk/debug/*.apk release-artifacts/ || true
@@ -220,10 +254,10 @@ jobs:
       - name: Upload artifacts to GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: client/keyple-mobile-android/release-artifacts/*
+          files: ./src/reloading-remote/client/keyple-mobile-android/release-artifacts/*
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  publish-release-client-pc-dotnet:
+  publish-release-reloading-client-pc-dotnet:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code from ${{ github.repository }}/${{ github.ref }}
@@ -235,7 +269,7 @@ jobs:
           dotnet-version: 7.0.x
 
       - name: Check code format, build, test, and publish client .NET
-        working-directory: ./client/pc-dotnet/
+        working-directory: ./src/reloading-remote/client/pc-dotnet/
         run: |
           dotnet restore
           dotnet format --verify-no-changes App.sln
@@ -243,12 +277,47 @@ jobs:
           dotnet publish -c Release -r win-x64 --no-restore -o ./publish
 
       - name: Archive the published application
-        working-directory: ./client/pc-dotnet/publish/
+        working-directory: ./src/reloading-remote/client/pc-dotnet/publish/
         run: |
           zip -j -r "../keyple-demo-ticketing-reloading-pc-dotnet-app-${{ github.ref_name }}.zip" ./*
 
       - name: Upload artifacts to GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: client/pc-dotnet/keyple-demo-ticketing-reloading-pc-dotnet-app-${{ github.ref_name }}.zip
+          files: ./src/reloading-remote/client/pc-dotnet/keyple-demo-ticketing-reloading-pc-dotnet-app-${{ github.ref_name }}.zip
           token: ${{ secrets.GITHUB_TOKEN }}
+          
+  publish-release-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code from ${{ github.repository }}/${{ github.ref }}
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Update permissions
+        working-directory: .
+        run: chmod +x ./src/validation/gradlew ./.github/scripts/*.sh
+
+      - name: Build artifacts
+        env:
+          ORG_GRADLE_PROJECT_releaseTag: ${{ github.event.release.tag_name }}
+        working-directory: ./src/validation/
+        run: ./gradlew build
+
+      - name: Collect artifacts
+        working-directory: ./src/validation/
+        run: |
+          mkdir -p release-artifacts
+          cp app/build/outputs/apk/debug/*.apk release-artifacts/ || true
+
+      - name: Upload artifacts to GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./src/validation/release-artifacts/*
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
