@@ -2,7 +2,7 @@
 //  GRADLE CONFIGURATION
 ///////////////////////////////////////////////////////////////////////////////
 plugins {
-  kotlin("jvm") version "1.7.0"
+  kotlin("jvm")
   id("com.diffplug.spotless") version "7.0.4"
 }
 
